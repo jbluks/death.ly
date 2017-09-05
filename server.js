@@ -17,15 +17,18 @@ TODO:
 
 const config = require('./config');
 const app = require('express')();
+const bodyParser = require('body-parser');
+const routes = require('./routes/routes.js');
 
 app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use('/', routes)
 
-// require the Twilio module and create a REST client
+/* APIs */
 const TWILIO_CLIENT = require('twilio')(config.accountSid, config.authToken);
-
-// Require with custom API key
 const GIPHY = require('giphy-api')(config.giphyAPIKey);
 
+/* Globals */
 let gif_images = [];
 let i = 0;
 let id;
@@ -38,63 +41,6 @@ GIPHY.search('death', (err, res) => {
     });
 });
 
-function killDeathGifs() {
-    clearInterval(id);
-}
-
-function sendDeathGif(gif) {
-    TWILIO_CLIENT.messages.create(
-      {
-        to: '+14168805435',
-        from: '+16479521905',
-        body: 'You never know when...or how...the end will come.',
-        mediaUrl: gif,
-      },
-      (err, message) => {
-        if(err) {
-          console.log(err);
-          return;
-        }
-        console.log(message.status);
-      }
-    );
-}
-
-app.get('/', (req, res) => {
-    res.render('index',{});
-})
-
-app.post('/register', (req, res) => {
-
-})
-
-app.get('/admin', (req, res) => {
-    res.send('Death.ly Admin')
-})
-
-app.get('/start', (req, res) => {
-    if(!id) {
-        id = setInterval(() => {
-            console.log('sending death gif...' + gif_images[i])
-            sendDeathGif(gif_images[i]);
-            i++;
-            if(i >= 5) {
-                console.log('killing death gif...')
-                killDeathGifs();
-            }
-        }, INTERVAL);
-        res.send(`death gifs started. Interval is ${INTERVAL}`);
-    } else {
-        res.send('death gifs already started.')
-    }
-})
-
-app.get('/stop', (req, res) => {
-    killDeathGifs();
-    res.send('Death Gifs Killed.')
-})
-
-
-app.listen(8080, () => {
-    console.log('Death.ly listening on 8080.');
+app.listen(config.port, () => {
+    console.log(`Death.ly listening on ${config.port}.`);
 })
