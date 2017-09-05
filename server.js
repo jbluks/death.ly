@@ -20,8 +20,6 @@ const config = require('./config');
 const app = require('express')();
 
 // Twilio Credentials
-//const accountSid = 'AC34f9ff675188a3ec29e1e01a2f35c3cd';
-//const authToken = 'cb7e837d7b6ff2920d59120a42582e80';
 
 // require the Twilio module and create a REST client
 const TWILIO_CLIENT = require('twilio')(config.accountSid, config.authToken);
