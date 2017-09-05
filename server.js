@@ -16,21 +16,20 @@ TODO:
 */
 
 const config = require('./config');
-
 const app = require('express')();
 
-// Twilio Credentials
-//const accountSid = 'AC34f9ff675188a3ec29e1e01a2f35c3cd';
-//const authToken = 'cb7e837d7b6ff2920d59120a42582e80';
+app.set('view engine', 'ejs');
 
 // require the Twilio module and create a REST client
 const TWILIO_CLIENT = require('twilio')(config.accountSid, config.authToken);
 
 // Require with custom API key
-const GIPHY = require('giphy-api')('41f61f5ee4c2453680eba131965f0551');
+const GIPHY = require('giphy-api')(config.giphyAPIKey);
 
 let gif_images = [];
 let i = 0;
+let id;
+const INTERVAL = 24*60*60*1000; //time to send gif
 
 // Search with a plain string using callback
 GIPHY.search('death', (err, res) => {
@@ -38,16 +37,6 @@ GIPHY.search('death', (err, res) => {
         return gif.images.original.url;
     });
 });
-
-let id = setInterval(() => {
-    console.log('sending death gif...' + gif_images[i])
-    sendDeathGif(gif_images[i]);
-    i++;
-    if(i >= 5) {
-        console.log('killing death gif...')
-        killDeathGifs();
-    }
-}, 5000);
 
 function killDeathGifs() {
     clearInterval(id);
@@ -70,6 +59,41 @@ function sendDeathGif(gif) {
       }
     );
 }
+
+app.get('/', (req, res) => {
+    res.render('index',{});
+})
+
+app.post('/register', (req, res) => {
+
+})
+
+app.get('/admin', (req, res) => {
+    res.send('Death.ly Admin')
+})
+
+app.get('/start', (req, res) => {
+    if(!id) {
+        id = setInterval(() => {
+            console.log('sending death gif...' + gif_images[i])
+            sendDeathGif(gif_images[i]);
+            i++;
+            if(i >= 5) {
+                console.log('killing death gif...')
+                killDeathGifs();
+            }
+        }, INTERVAL);
+        res.send(`death gifs started. Interval is ${INTERVAL}`);
+    } else {
+        res.send('death gifs already started.')
+    }
+})
+
+app.get('/stop', (req, res) => {
+    killDeathGifs();
+    res.send('Death Gifs Killed.')
+})
+
 
 app.listen(8080, () => {
     console.log('Death.ly listening on 8080.');
