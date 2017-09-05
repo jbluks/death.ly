@@ -12,6 +12,7 @@ TODO:
 -- Provide unsubscribe option
 -- Handle unsubscribe message from SMS
 -- Install on Heroku
+-- Create some random text message to include with gifs
 
 */
 
@@ -23,23 +24,6 @@ const routes = require('./routes/routes.js');
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use('/', routes)
-
-/* APIs */
-const TWILIO_CLIENT = require('twilio')(config.accountSid, config.authToken);
-const GIPHY = require('giphy-api')(config.giphyAPIKey);
-
-/* Globals */
-let gif_images = [];
-let i = 0;
-let id;
-const INTERVAL = 24*60*60*1000; //time to send gif
-
-// Search with a plain string using callback
-GIPHY.search('death', (err, res) => {
-    gif_images = res.data.map((gif) => {
-        return gif.images.original.url;
-    });
-});
 
 app.listen(config.port, () => {
     console.log(`Death.ly listening on ${config.port}.`);

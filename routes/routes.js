@@ -1,13 +1,33 @@
+const config = require('../config');
 const router = require('express').Router()
-
-/* List of Recipients of death.ly gifs */
-let recipients = [];
 
 /* Helper Functions */
 const helpers = require('../lib/helpers');
 const killDeathGifs = helpers.killDeathGifs,
       sendDeathGifs = helpers.sendDeathGif,
       formatE164 = helpers.formatE164;
+
+/* APIs */
+const TWILIO_CLIENT = require('twilio')(config.accountSid, config.authToken);
+const GIPHY = require('giphy-api')(config.giphyAPIKey);
+
+/* Globals */
+let gif_images = [];
+let recipients = [];
+const messages = require('../messages.json');
+const INTERVAL = 24*60*60*1000; //time to send gif
+
+// Search with a plain string using callback
+GIPHY.search('death', (err, res) => {
+  gif_images = res.data.map((gif) => {
+      return gif.images.downsized.url;
+  });
+  console.log(gif_images);
+});
+
+console.log(messages);
+
+/* Routes */
 
 router.get('/', (req, res) => {
     res.render('index',{});
@@ -56,6 +76,7 @@ router.get('/start', (req, res) => {
     console.log(recipient);
 
     if(recipient) {
+        let i = 0;
         recipient.processId = setInterval(() => {
             console.log('sending death gif...' + gif_images[i])
             sendDeathGif(recipient, gif_images[i]);
