@@ -25,7 +25,7 @@ const app = require('express')();
 const TWILIO_CLIENT = require('twilio')(config.accountSid, config.authToken);
 
 // Require with custom API key
-const GIPHY = require('giphy-api')('41f61f5ee4c2453680eba131965f0551');
+const GIPHY = require('giphy-api')('');
 
 let gif_images = [];
 let i = 0;
