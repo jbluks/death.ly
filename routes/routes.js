@@ -3,29 +3,9 @@ const router = require('express').Router()
 
 /* Helper Functions */
 const helpers = require('../lib/helpers');
-const killDeathGifs = helpers.killDeathGifs,
-      sendDeathGifs = helpers.sendDeathGif,
-      formatE164 = helpers.formatE164;
-
-/* APIs */
-const TWILIO_CLIENT = require('twilio')(config.accountSid, config.authToken);
-const GIPHY = require('giphy-api')(config.giphyAPIKey);
-
-/* Globals */
-let gif_images = [];
-let recipients = [];
-const messages = require('../messages.json');
-const INTERVAL = 24*60*60*1000; //time to send gif
-
-// Search with a plain string using callback
-GIPHY.search('death', (err, res) => {
-  gif_images = res.data.map((gif) => {
-      return gif.images.downsized.url;
-  });
-  console.log(gif_images);
-});
-
-console.log(messages);
+const formatE164 = helpers.formatE164,
+      scheduleDaily = helpers.scheduleDaily,
+      recipients = helpers.recipients;
 
 /* Routes */
 
@@ -43,6 +23,8 @@ router.post('/register', (req, res) => {
     recipients.push({
         name: req.body.name,
         number: number,
+        status: stopped,
+        frequency: 'daily',
         processId: 0,
         history: []
     })
@@ -67,28 +49,17 @@ router.get('/admin', (req, res) => {
 })
 
 router.get('/start', (req, res) => {
-    let number = req.query.number;
+    let number = formatE164(req.query.number);
 
-    let recipient = recipients.find(recipient => {
+    let recipient = recipients.getRecipients().find(recipient => {
         return recipient.number === number
     })
 
-    console.log(recipient);
-
     if(recipient) {
-        let i = 0;
-        recipient.processId = setInterval(() => {
-            console.log('sending death gif...' + gif_images[i])
-            sendDeathGif(recipient, gif_images[i]);
-            i++;
-            if(i >= 5) {
-                console.log('killing death gif...')
-                killDeathGifs();
-            }
-        }, INTERVAL);
-        res.send(`death gifs started. Interval is ${INTERVAL}`);
+        scheduleDaily(recipient);
+        res.send('Scheduled Daily');
     } else {
-        res.send('death gifs already started.')
+        res.send(`${number} not found.`);
     }
 })
 
@@ -100,7 +71,7 @@ router.get('/stop', (req, res) => {
     })
 
     if(recipient) {
-        killDeathGifs(recipient.processId);
+        //killDeathGifs(recipient.processId);
     }
 
     res.send('Death Gifs Killed.')

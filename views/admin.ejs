@@ -2,8 +2,50 @@
 <% include ./partials/head %>
 <body>
   <div class="container">
-    <%= recipients[0].name %>
-    <%= recipients[0].number %>
+    <h1>Admin</h1>
+    <ul>
+      <table>
+        <tbody>
+          <tr>
+            <th>
+              Name
+            </th>
+            <th>
+              Number
+            </th>
+            <th>
+              Status
+            </th>
+            <th>
+              &nbsp;
+            </th>
+          </tr>
+          <% for(let i=0; i<recipients.length; i++) {%>
+            <tr>
+              <td>
+                <%= recipients[i].name %>
+              </td>
+              <td>
+                <%= recipients[i].number %>
+              </td>
+              <td>
+                <%= recipients[i].status %>
+              </td>
+              <td>
+                <button>Start</button>
+                <button>Stop</button>
+                <button>Delete</button>
+                <select name="schedule">
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly - Random</option>
+                </select>
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </ul>
   </div>
 </body>
 </html>
