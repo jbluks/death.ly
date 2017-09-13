@@ -1,4 +1,4 @@
-.env
+.env*
 !.env.example
 recipients.json
 node_modules
